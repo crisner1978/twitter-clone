@@ -1,4 +1,5 @@
-import { format, formatDistanceToNow } from "date-fns";
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import format from "date-fns/format"
 
 // https://date-fns.org/v2.17.0/docs/formatDistanceToNow
 export function formatCreatedAt(timestamp) {

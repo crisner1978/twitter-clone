@@ -15,7 +15,7 @@ export async function login(payload) {
 
 export async function signup(payload) {
   await client.post("/auth/signup", payload)
-  window.location.assign = '/settings/profile?redirect=true';
+  window.location.assign('/settings/profile?redirected=true');
 }
 
 export async function logout() {
@@ -23,66 +23,115 @@ export async function logout() {
   window.location.pathname = '/';
 }
 
-export async function getNotifications() { }
+export async function getNotifications() {
+  return await client.get(`/api/notifications`)
+    .then(res => res.data.notifications)
+ }
 
-export function readNotification() { }
+export async function readNotification(notification) {
+  await client.get(`/api/notification_read/${notification._id}`)
+ }
 
 export async function getPost() { }
 
 export async function getReplies(postId) {
-  return await client.get(`/api/post/${postId}/replies`).then(res => res.data.posts);
+  return await client.get(`/api/post/${postId}/replies`)
+    .then(res => res.data.posts);
 }
 
-export async function getUserTimeline() { }
+export async function getUserTimeline(username) {
+  return await client.get(`/api/user_timeline/${username}`)
+    .then(res => res.data)
+}
 
-export async function getPosts() {
-  return await client.get("/api/home_timeline").then(res => res.data.posts)
+export async function getPosts({ pageParam = 1 }) {
+  return await client.get(`/api/home_timeline?p=${pageParam}`)
+    .then(res => res.data.posts)
 }
 
 export async function getPostLikes(postId) {
-  return await client.get(`/api/post/${postId}/likes`).then(res => res.data.users)
+  return await client.get(`/api/post/${postId}/likes`)
+    .then(res => res.data.users)
 }
 
-export async function followUser() { }
+export async function followUser(username) {
+  await client.get(`/api/follow/${username}`);
+  await queryClient.invalidateQueries("Search")
+  await queryClient.invalidateQueries("UserFriends")
+  await queryClient.invalidateQueries("UserSuggestions")
+  await queryClient.invalidateQueries("Posts")
+  await queryClient.invalidateQueries("UserDetail")
+}
 
-export async function unfollowUser() { }
+export async function unfollowUser(username) {
+  await client.get(`/api/unfollow/${username}`)
+  await queryClient.invalidateQueries("Search")
+  await queryClient.invalidateQueries("UserFriends")
+  await queryClient.invalidateQueries("UserSuggestions")
+  await queryClient.invalidateQueries("Posts")
+  await queryClient.invalidateQueries("UserDetail")
+}
 
 export async function getPostReposts(postId) {
-  return await client.get(`/api/post/${postId}/reposts`).then(res => res.data.users)
+  return await client.get(`/api/post/${postId}/reposts`)
+    .then(res => res.data.users)
 }
 
-export async function getUserFollowers() { }
+export async function getUserFollowers(username) { 
+  return await client.get(`/api/followers/${username}`)
+    .then(res => res.data.users)
+}
 
-export async function getFriends() { }
+export async function getFriends(username) {
+  return await client.get(`/api/friends/${username}`)
+    .then(res => res.data.users);
+}
 
-export async function getUserSuggestions() { }
+export async function getUserSuggestions() {
+  return await client.get('/api/users').then(res => res.data.users)
+}
 
-export async function getTrends() { }
+export async function getTrends() {
+  return await client.get('/api/trends').then(res => res.data.trends)
+}
 
-export async function getSearchResults() { }
+export async function getSearchResults(query) {
+  return await client.get(`/api/search?q=${encodeURIComponent(query)}`)
+    .then(res => res.data);
+}
 
 export async function likePost(post) {
   await client.get(`/api/like/${post.id_str}`)
   await queryClient.invalidateQueries("Posts")
   await queryClient.invalidateQueries("PostDetail")
+  await queryClient.invalidateQueries("PostReplies")
+  await queryClient.invalidateQueries("UserDetail")
+  await queryClient.invalidateQueries("Search")
 }
 
 export async function unlikePost(post) {
   await client.get(`/api/unlike/${post.id_str}`)
   await queryClient.invalidateQueries("Posts")
   await queryClient.invalidateQueries("PostDetail")
+  await queryClient.invalidateQueries("PostReplies")
+  await queryClient.invalidateQueries("UserDetail")
+  await queryClient.invalidateQueries("Search")
 }
 
 export async function unrepostPost(post) {
   await client.post(`/api/unrepost`, post);
   await queryClient.invalidateQueries("Posts")
   await queryClient.invalidateQueries("PostDetail")
+  await queryClient.invalidateQueries("PostReplies")
+  await queryClient.invalidateQueries("UserDetail")
 }
 
 export async function repostPost(post) {
   await client.post(`/api/repost`, post);
   await queryClient.invalidateQueries("Posts")
   await queryClient.invalidateQueries("PostDetail")
+  await queryClient.invalidateQueries("PostReplies")
+  await queryClient.invalidateQueries("UserDetail")
 }
 
 export async function updateUserDetails(user) {
@@ -95,5 +144,6 @@ export async function createPost(post, url = "/api/post") {
 }
 
 export async function getPostById(postId) {
-  return await client.get(`/api/post/${postId}`).then(res => res.data.post)
+  return await client.get(`/api/post/${postId}`)
+    .then(res => res.data.post)
 }

@@ -7,6 +7,7 @@ export default function UsersList(props) {
   const { className, users, isSuccess, isLoading, length, ...rest } = props;
 
   if (isLoading) return <Spinner />
+
   return (
     <ListGroup className={`border-bottom ${className}`} variant="flush">
       {isSuccess ? (

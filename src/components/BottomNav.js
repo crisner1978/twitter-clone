@@ -6,13 +6,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAuthUser } from "context/auth-context";
 import React from "react";
 import { Badge } from "react-bootstrap";
+import { useQuery } from "react-query";
 import { Link, NavLink } from "react-router-dom";
+import { getNotifications } from "utils/api-client";
 
 export default function BottomNav() {
-
   const authUser = useAuthUser()
-  console.log('authUser', authUser)
+  const { data: notifications } = useQuery("Notifications", getNotifications);
 
+  const notificationsCount = notifications?.filter(n => !n.read).length
   const list = [
     {
       name: "Home",
@@ -28,7 +30,7 @@ export default function BottomNav() {
       name: "Notifications",
       href: "/notifications",
       icon: faBell,
-      count: 0,
+      count: notificationsCount,
     },
     {
       name: "Profile",
